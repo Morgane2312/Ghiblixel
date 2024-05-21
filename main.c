@@ -42,6 +42,7 @@ SDL_Texture* enemyTexture = NULL;
 Noodle noodles[NUM_NOODLES];
 SDL_Texture* noodleTexture = NULL;
 
+
 SDL_Texture* pacmanTextureGauche1 = NULL;
 SDL_Texture* pacmanTextureGauche2 = NULL;
 SDL_Texture* pacmanTextureDerriere = NULL;
