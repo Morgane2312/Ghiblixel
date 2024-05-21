@@ -95,7 +95,7 @@ printf("Loading textures from:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 }
 
 void initBarriers() {
-    // BarriÃ¨res horizontales
+    // Barrières horizontales
     barriers[0].x = 206;
     barriers[0].y = 165;
     barriers[0].width = 57;
@@ -161,7 +161,7 @@ void initBarriers() {
     barriers[12].width = 50;
     barriers[12].height = 8;
 
-    // BarriÃ¨res verticales
+    // Barrières verticales
     barriers[13].x = 115;
     barriers[13].y = 160;
     barriers[13].width = 8;
@@ -255,7 +255,7 @@ void initBarriers() {
 
     barriers[31].x = 495;
     barriers[31].y = 35;
-    barriers[31].width = 200;
+    barriers[31].width = 300;
     barriers[31].height = 55;
 
     barriers[32].x = 100;
@@ -272,6 +272,26 @@ void initBarriers() {
     barriers[34].y = 400;
     barriers[34].width = 50;
     barriers[34].height = 50;
+
+    barriers[35].x = 0;
+    barriers[35].y = 0;
+    barriers[35].width = 715;
+    barriers[35].height = 54;
+
+    barriers[36].x = 598;
+    barriers[36].y = 0;
+    barriers[36].width = 120;
+    barriers[36].height = 500;
+
+    barriers[37].x = 550;
+    barriers[37].y = 50;
+    barriers[37].width = 50;
+    barriers[37].height = 155;
+
+    barriers[38].x = 498;
+    barriers[38].y = 350;
+    barriers[38].width = 200;
+    barriers[38].height = 155;
 }
 
 void handleInput(SDL_Event event) {
