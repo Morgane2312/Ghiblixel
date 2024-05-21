@@ -16,12 +16,6 @@
 #define MAX_BARRIERS 50
 #define MAX_BAR_WIDTH 20
 #define MAX_BAR_HEIGHT 50
-#define NUM_NOODLES 10
-
-typedef struct {
-    int x, y;
-    bool captured;
-} Noodle;
 
 typedef struct {
     int x, y, dx, dy, lives;
@@ -39,11 +33,6 @@ Pacman pacmanSingle = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 0, 0, 5};
 Pacman pacmans[NUM_PACMANS];
 Enemy enemies[NUM_ENEMIES];
 SDL_Texture* enemyTexture = NULL;
-Noodle noodles[NUM_NOODLES];
-SDL_Texture* noodleTexture = NULL;
-
-
-
 
 SDL_Texture* pacmanTextureGauche1 = NULL;
 SDL_Texture* pacmanTextureGauche2 = NULL;
@@ -56,7 +45,6 @@ SDL_Texture* pacmanTextureDebut = NULL;
 SDL_Texture* backgroundTexture = NULL;
 SDL_Texture* menuTexture = NULL;
 SDL_Texture* deathTexture = NULL;
-SDL_Renderer *renderer = NULL;
 Barrier barriers[MAX_BARRIERS];
 
 void loadPacmanTextures(SDL_Renderer* renderer) {
@@ -104,14 +92,6 @@ printf("Loading textures from:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
     SDL_FreeSurface(tempSurfaceDroit1);
     SDL_FreeSurface(tempSurfaceDroit2);
     SDL_FreeSurface(tempSurfaceDebut);
-}
-
-void initNoodles() {
-    for (int i = 0; i < NUM_NOODLES; i++) {
-        noodles[i].x = rand() % (WINDOW_WIDTH - PACMAN_SIZE);
-        noodles[i].y = rand() % (WINDOW_HEIGHT - PACMAN_SIZE);
-        noodles[i].captured = false;
-    }
 }
 
 void initBarriers() {
@@ -335,48 +315,6 @@ void updatePacman() {
     pacmanSingle.y = newY;
 }
 
-void initNoodles() {
-    for (int i = 0; i < NUM_NOODLES; i++) {
-        noodles[i].x = rand() % (WINDOW_WIDTH - PACMAN_SIZE);
-        noodles[i].y = rand() % (WINDOW_HEIGHT - PACMAN_SIZE);
-        noodles[i].captured = false;
-    }
-}
-
-void loadNoodleTexture(SDL_Renderer* renderer) {
-    const char* filePath = "assets/nouille.png";
-    SDL_Surface* tempSurface = IMG_Load(filePath);
-    if (!tempSurface) {
-        printf("Impossible de charger l'image %s! SDL Error: %s\n", filePath, IMG_GetError());
-        exit(1);
-    }
-    noodleTexture = SDL_CreateTextureFromSurface(renderer, tempSurface);
-    SDL_FreeSurface(tempSurface);
-}
-
-void updateNoodles() {
-    for (int i = 0; i < NUM_NOODLES; i++) {
-        if (!noodles[i].captured) {
-            SDL_Rect noodleRect = { noodles[i].x, noodles[i].y, NOODLE_SIZE, NOODLE_SIZE };
-            SDL_RenderCopy(renderer, noodleTexture, NULL, &noodleRect);
-        }
-    }
-}
-
-bool checkNoodleCapture(Pacman* pacman) {
-    for (int i = 0; i < NUM_NOODLES; i++) {
-        if (!noodles[i].captured &&
-            pacman->x < noodles[i].x + NOODLE_SIZE &&
-            pacman->x + PACMAN_SIZE > noodles[i].x &&
-            pacman->y < noodles[i].y + NOODLE_SIZE &&
-            pacman->y + PACMAN_SIZE > noodles[i].y) {
-            noodles[i].captured = true;
-            return true;
-        }
-    }
-    return false;
-}
-
 void loadMenuTexture(SDL_Renderer* renderer) {
     const char* menuFilePath = "assets/menu.png";
     SDL_Surface* tempSurface = IMG_Load(menuFilePath);
@@ -526,24 +464,6 @@ int main(int argc, char* argv[]) {
             updatePacman();
             updateEnemies();
 
-            if (checkNoodleCapture(&pacmanSingle)) {
-                printf("Pacman a attrapé une nouille !\n");
-                // Vérifie si toutes les nouilles ont été attrapées
-                bool allNoodlesCaptured = true;
-                for (int i = 0; i < NUM_NOODLES; i++) {
-                    if (!noodles[i].captured) {
-                        allNoodlesCaptured = false;
-                        break;
-                    }
-                }
-                if (allNoodlesCaptured) {
-                    printf("Pacman a attrapé toutes les nouilles !\n");
-                    // Déclenche un événement pour la fin du jeu
-                    gameOver = true;
-                }
-            }
-        }
-
             for (int i = 0; i < NUM_ENEMIES; i++) {
                 if (checkCollision(&enemies[i], &pacmanSingle)) {
                     pacmanSingle.lives--;
@@ -621,8 +541,6 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(enemyTexture);
     SDL_DestroyTexture(menuTexture);
     SDL_DestroyTexture(deathTexture);
-    loadNoodleTexture(renderer);
-    initNoodles();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
