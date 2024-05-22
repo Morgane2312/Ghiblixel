@@ -16,57 +16,72 @@
 #define MAX_BARRIERS 50
 #define MAX_BAR_WIDTH 20
 #define MAX_BAR_HEIGHT 50
+#define NUM_NOODLES 5
 
-typedef struct {
+typedef struct
+{
     int x, y, dx, dy, lives;
 } Pacman;
 
-typedef struct {
+typedef struct
+{
     int x, y, dx, dy;
 } Enemy;
 
-typedef struct {
+typedef struct
+{
     int x, y, width, height;
 } Barrier;
+
+typedef struct
+{
+    int x, y;
+    bool isVisible;
+} Noodle;
 
 Pacman pacmanSingle = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 0, 0, 5};
 Pacman pacmans[NUM_PACMANS];
 Enemy enemies[NUM_ENEMIES];
-SDL_Texture* enemyTexture = NULL;
+Noodle noodles[NUM_NOODLES];
 
-SDL_Texture* pacmanTextureGauche1 = NULL;
-SDL_Texture* pacmanTextureGauche2 = NULL;
-SDL_Texture* pacmanTextureDerriere = NULL;
-SDL_Texture* pacmanTextureDevant1 = NULL;
-SDL_Texture* pacmanTextureDevant2 = NULL;
-SDL_Texture* pacmanTextureDroit1 = NULL;
-SDL_Texture* pacmanTextureDroit2 = NULL;
-SDL_Texture* pacmanTextureDebut = NULL;
-SDL_Texture* backgroundTexture = NULL;
-SDL_Texture* menuTexture = NULL;
-SDL_Texture* deathTexture = NULL;
+SDL_Texture *noodleTexture = NULL;
+SDL_Texture *enemyTexture = NULL;
+
+SDL_Texture *pacmanTextureGauche1 = NULL;
+SDL_Texture *pacmanTextureGauche2 = NULL;
+SDL_Texture *pacmanTextureDerriere = NULL;
+SDL_Texture *pacmanTextureDevant1 = NULL;
+SDL_Texture *pacmanTextureDevant2 = NULL;
+SDL_Texture *pacmanTextureDroit1 = NULL;
+SDL_Texture *pacmanTextureDroit2 = NULL;
+SDL_Texture *pacmanTextureDebut = NULL;
+SDL_Texture *backgroundTexture = NULL;
+SDL_Texture *menuTexture = NULL;
+SDL_Texture *deathTexture = NULL;
 Barrier barriers[MAX_BARRIERS];
 
-void loadPacmanTextures(SDL_Renderer* renderer) {
-    const char* filePathGauche1 = "assets/totoro_gauche_1.png";
-    const char* filePathGauche2 = "assets/totoro_gauche_2.png";
-    const char* filePathDerriere = "assets/totoro_dos.png";
-    const char* filePathDevant1 = "assets/totoro_bas_1.png";
-    const char* filePathDevant2 = "assets/totoro_bas_2.png";
-    const char* filePathDroit1 = "assets/totoro_droit_1.png";
-    const char* filePathDroit2 = "assets/totoro_droit_2.png";
-    const char* filePathDebut = "assets/totoro.png";
+void loadPacmanTextures(SDL_Renderer *renderer)
+{
+    const char *filePathGauche1 = "assets/totoro_gauche_1.png";
+    const char *filePathGauche2 = "assets/totoro_gauche_2.png";
+    const char *filePathDerriere = "assets/totoro_dos.png";
+    const char *filePathDevant1 = "assets/totoro_bas_1.png";
+    const char *filePathDevant2 = "assets/totoro_bas_2.png";
+    const char *filePathDroit1 = "assets/totoro_droit_1.png";
+    const char *filePathDroit2 = "assets/totoro_droit_2.png";
+    const char *filePathDebut = "assets/totoro.png";
 
-    SDL_Surface* tempSurfaceGauche1 = IMG_Load(filePathGauche1);
-    SDL_Surface* tempSurfaceGauche2 = IMG_Load(filePathGauche2);
-    SDL_Surface* tempSurfaceDerriere = IMG_Load(filePathDerriere);
-    SDL_Surface* tempSurfaceDevant1 = IMG_Load(filePathDevant1);
-    SDL_Surface* tempSurfaceDevant2 = IMG_Load(filePathDevant2);
-    SDL_Surface* tempSurfaceDroit1 = IMG_Load(filePathDroit1);
-    SDL_Surface* tempSurfaceDroit2 = IMG_Load(filePathDroit2);
-    SDL_Surface* tempSurfaceDebut = IMG_Load(filePathDebut);
+    SDL_Surface *tempSurfaceGauche1 = IMG_Load(filePathGauche1);
+    SDL_Surface *tempSurfaceGauche2 = IMG_Load(filePathGauche2);
+    SDL_Surface *tempSurfaceDerriere = IMG_Load(filePathDerriere);
+    SDL_Surface *tempSurfaceDevant1 = IMG_Load(filePathDevant1);
+    SDL_Surface *tempSurfaceDevant2 = IMG_Load(filePathDevant2);
+    SDL_Surface *tempSurfaceDroit1 = IMG_Load(filePathDroit1);
+    SDL_Surface *tempSurfaceDroit2 = IMG_Load(filePathDroit2);
+    SDL_Surface *tempSurfaceDebut = IMG_Load(filePathDebut);
 
-   if (!tempSurfaceGauche1 || !tempSurfaceGauche2 || !tempSurfaceDerriere || !tempSurfaceDevant1 || !tempSurfaceDevant2 || !tempSurfaceDroit1 || !tempSurfaceDroit2 || !tempSurfaceDebut) {
+    if (!tempSurfaceGauche1 || !tempSurfaceGauche2 || !tempSurfaceDerriere || !tempSurfaceDevant1 || !tempSurfaceDevant2 || !tempSurfaceDroit1 || !tempSurfaceDroit2 || !tempSurfaceDebut)
+    {
         printf("Impossible de charger l'une des images! Erreur SDL: %s\n", IMG_GetError());
         exit(1);
     }
@@ -90,7 +105,31 @@ void loadPacmanTextures(SDL_Renderer* renderer) {
     SDL_FreeSurface(tempSurfaceDebut);
 }
 
-void initBarriers() {
+void loadNoodleTexture(SDL_Renderer *renderer)
+{
+    const char *filePath = "assets/nouilles.png";
+    SDL_Surface *tempSurface = IMG_Load(filePath);
+    if (!tempSurface)
+    {
+        printf("Impossible de charger l'image %s! SDL Error: %s\n", filePath, IMG_GetError());
+        exit(1);
+    }
+    noodleTexture = SDL_CreateTextureFromSurface(renderer, tempSurface);
+    SDL_FreeSurface(tempSurface);
+}
+
+void initNoodles()
+{
+    for (int i = 0; i < NUM_NOODLES; i++)
+    {
+        noodles[i].x = rand() % (WINDOW_WIDTH - PACMAN_SIZE);
+        noodles[i].y = rand() % (WINDOW_HEIGHT - PACMAN_SIZE);
+        noodles[i].isVisible = true;
+    }
+}
+
+void initBarriers()
+{
     // Barrières horizontales
     barriers[0].x = 206;
     barriers[0].y = 165;
@@ -146,7 +185,7 @@ void initBarriers() {
     barriers[10].y = 150;
     barriers[10].width = 40;
     barriers[10].height = 8;
-       
+
     barriers[11].x = 490;
     barriers[11].y = 85;
     barriers[11].width = 50;
@@ -233,7 +272,7 @@ void initBarriers() {
     barriers[27].width = 8;
     barriers[27].height = 35;
 
-    //Autour de la map
+    // Autour de la map
     barriers[28].x = 0;
     barriers[28].y = 420;
     barriers[28].width = 715;
@@ -290,21 +329,38 @@ void initBarriers() {
     barriers[38].height = 155;
 }
 
-void handleInput(SDL_Event event) {
-    switch (event.key.keysym.sym) {
-        case SDLK_UP:    pacmanSingle.dy = -1; pacmanSingle.dx = 0; break;
-        case SDLK_DOWN:  pacmanSingle.dy = 1;  pacmanSingle.dx = 0; break;
-        case SDLK_LEFT:  pacmanSingle.dx = -1; pacmanSingle.dy = 0; break;
-        case SDLK_RIGHT: pacmanSingle.dx = 1;  pacmanSingle.dy = 0; break;
-        default: break;
+void handleInput(SDL_Event event)
+{
+    switch (event.key.keysym.sym)
+    {
+    case SDLK_UP:
+        pacmanSingle.dy = -1;
+        pacmanSingle.dx = 0;
+        break;
+    case SDLK_DOWN:
+        pacmanSingle.dy = 1;
+        pacmanSingle.dx = 0;
+        break;
+    case SDLK_LEFT:
+        pacmanSingle.dx = -1;
+        pacmanSingle.dy = 0;
+        break;
+    case SDLK_RIGHT:
+        pacmanSingle.dx = 1;
+        pacmanSingle.dy = 0;
+        break;
+    default:
+        break;
     }
 }
 
-void updatePacman() {
+void updatePacman()
+{
     int newX = pacmanSingle.x + pacmanSingle.dx * PACMAN_SPEED;
     int newY = pacmanSingle.y + pacmanSingle.dy * PACMAN_SPEED;
 
-    for (int i = 0; i < MAX_BARRIERS; i++) {
+    for (int i = 0; i < MAX_BARRIERS; i++)
+    {
         int barrierX = barriers[i].x;
         int barrierY = barriers[i].y;
         int barrierWidth = barriers[i].width;
@@ -314,7 +370,8 @@ void updatePacman() {
         if (newX < barrierX + barrierWidth &&
             newX + PACMAN_SIZE > barrierX &&
             newY < barrierY + barrierHeight &&
-            newY + PACMAN_SIZE > barrierY) {
+            newY + PACMAN_SIZE > barrierY)
+        {
             // Collision détectée, annuler le déplacement
             newX = pacmanSingle.x;
             newY = pacmanSingle.y;
@@ -322,19 +379,25 @@ void updatePacman() {
     }
 
     // Limiter les mouvements à l'intérieur de la fenêtre
-    if (newX < 0) newX = 0;
-    if (newX > WINDOW_WIDTH - PACMAN_SIZE) newX = WINDOW_WIDTH - PACMAN_SIZE;
-    if (newY < 0) newY = 0;
-    if (newY > WINDOW_HEIGHT - PACMAN_SIZE) newY = WINDOW_HEIGHT - PACMAN_SIZE;
+    if (newX < 0)
+        newX = 0;
+    if (newX > WINDOW_WIDTH - PACMAN_SIZE)
+        newX = WINDOW_WIDTH - PACMAN_SIZE;
+    if (newY < 0)
+        newY = 0;
+    if (newY > WINDOW_HEIGHT - PACMAN_SIZE)
+        newY = WINDOW_HEIGHT - PACMAN_SIZE;
 
     pacmanSingle.x = newX;
     pacmanSingle.y = newY;
 }
 
-void loadMenuTexture(SDL_Renderer* renderer) {
-    const char* menuFilePath = "assets/menu.png";
-    SDL_Surface* tempSurface = IMG_Load(menuFilePath);
-    if (!tempSurface) {
+void loadMenuTexture(SDL_Renderer *renderer)
+{
+    const char *menuFilePath = "assets/menu.png";
+    SDL_Surface *tempSurface = IMG_Load(menuFilePath);
+    if (!tempSurface)
+    {
         printf("Impossible de charger l'image du menu %s! Erreur SDL: %s\n", menuFilePath, IMG_GetError());
         exit(1);
     }
@@ -342,24 +405,45 @@ void loadMenuTexture(SDL_Renderer* renderer) {
     SDL_FreeSurface(tempSurface);
 }
 
-void initEnemies() {
-    for (int i = 0; i < NUM_ENEMIES; i++) {
+void initEnemies()
+{
+    for (int i = 0; i < NUM_ENEMIES; i++)
+    {
         enemies[i].x = rand() % (WINDOW_WIDTH - PACMAN_SIZE);
         enemies[i].y = rand() % (WINDOW_HEIGHT - PACMAN_SIZE);
-        if (rand() % 2) {
-            enemies[i].dx = (rand() % 2) * 2 - 1; 
+        if (rand() % 2)
+        {
+            enemies[i].dx = (rand() % 2) * 2 - 1;
             enemies[i].dy = 0;
-        } else {                                  
+        }
+        else
+        {
             enemies[i].dx = 0;
             enemies[i].dy = (rand() % 2) * 2 - 1;
         }
     }
 }
 
-void loadEnemyTexture(SDL_Renderer* renderer) {
-    const char* filePath = "assets/noiraude.png";
-    SDL_Surface* tempSurface = IMG_Load(filePath);
-    if (!tempSurface) {
+void renderNoodles(SDL_Renderer *renderer)
+{
+    SDL_Rect noodleRect = {0, 0, PACMAN_SIZE, PACMAN_SIZE};
+    for (int i = 0; i < NUM_NOODLES; i++)
+    {
+        if (noodles[i].isVisible)
+        {
+            noodleRect.x = noodles[i].x;
+            noodleRect.y = noodles[i].y;
+            SDL_RenderCopy(renderer, noodleTexture, NULL, &noodleRect);
+        }
+    }
+}
+
+void loadEnemyTexture(SDL_Renderer *renderer)
+{
+    const char *filePath = "assets/noiraude.png";
+    SDL_Surface *tempSurface = IMG_Load(filePath);
+    if (!tempSurface)
+    {
         printf("Impossible de charger l'image %s! SDL Error: %s\n", filePath, IMG_GetError());
         exit(1);
     }
@@ -367,29 +451,35 @@ void loadEnemyTexture(SDL_Renderer* renderer) {
     SDL_FreeSurface(tempSurface);
 }
 
-SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
-    SDL_Surface* tempSurface = IMG_Load(filePath);
-    if (!tempSurface) {
+SDL_Texture *loadTexture(SDL_Renderer *renderer, const char *filePath)
+{
+    SDL_Surface *tempSurface = IMG_Load(filePath);
+    if (!tempSurface)
+    {
         printf("Impossible de charger l'image %s! SDL Error: %s\n", filePath, IMG_GetError());
         exit(1);
     }
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, tempSurface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, tempSurface);
     SDL_FreeSurface(tempSurface);
     return texture;
 }
 
-void updateEnemies() {
-    for (int i = 0; i < NUM_ENEMIES; i++) {
+void updateEnemies()
+{
+    for (int i = 0; i < NUM_ENEMIES; i++)
+    {
         // Calculer la nouvelle position des ennemis
         int newX = (int)(enemies[i].x + enemies[i].dx * ENEMY_SPEED);
         int newY = (int)(enemies[i].y + enemies[i].dy * ENEMY_SPEED);
 
         // Vérifier les collisions avec les barrières
-        for (int j = 0; j < MAX_BARRIERS; j++) {
+        for (int j = 0; j < MAX_BARRIERS; j++)
+        {
             if (newX < barriers[j].x + barriers[j].width &&
                 newX + ENEMY_SIZE > barriers[j].x &&
                 newY < barriers[j].y + barriers[j].height &&
-                newY + ENEMY_SIZE > barriers[j].y) {
+                newY + ENEMY_SIZE > barriers[j].y)
+            {
                 // Collision détectée, inverser la direction de déplacement
                 enemies[i].dx *= -1;
                 enemies[i].dy *= -1;
@@ -402,36 +492,62 @@ void updateEnemies() {
         enemies[i].y = newY;
 
         // Vérifier les collisions avec les bords de l'écran
-        if (enemies[i].x <= 0 || enemies[i].x >= WINDOW_WIDTH - ENEMY_SIZE) enemies[i].dx *= -1;
-        if (enemies[i].y <= 0 || enemies[i].y >= WINDOW_HEIGHT - ENEMY_SIZE) enemies[i].dy *= -1;
+        if (enemies[i].x <= 0 || enemies[i].x >= WINDOW_WIDTH - ENEMY_SIZE)
+            enemies[i].dx *= -1;
+        if (enemies[i].y <= 0 || enemies[i].y >= WINDOW_HEIGHT - ENEMY_SIZE)
+            enemies[i].dy *= -1;
     }
 }
-bool checkCollision(Enemy* enemy, Pacman* pacman) {
+
+bool checkCollision(Enemy *enemy, Pacman *pacman)
+{
     return !(enemy->x + PACMAN_SIZE < pacman->x || enemy->x > pacman->x + PACMAN_SIZE ||
              enemy->y + PACMAN_SIZE < pacman->y || enemy->y > pacman->y + PACMAN_SIZE);
 }
 
-int main(int argc, char* argv[]) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+void checkNoodleCollision()
+{
+    SDL_Rect pacmanRect = {pacmanSingle.x, pacmanSingle.y, PACMAN_SIZE, PACMAN_SIZE};
+    for (int i = 0; i < NUM_NOODLES; i++)
+    {
+        if (noodles[i].isVisible)
+        {
+            SDL_Rect noodleRect = {noodles[i].x, noodles[i].y, PACMAN_SIZE, PACMAN_SIZE};
+            if (SDL_HasIntersection(&pacmanRect, &noodleRect))
+            {
+                noodles[i].isVisible = false;
+                // Ajoutez tout code supplémentaire ici si nécessaire (comme augmenter le score)
+            }
+        }
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
         fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
         return 1;
     }
 
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
+    {
         fprintf(stderr, "Could not initialize SDL_image: %s\n", IMG_GetError());
         SDL_Quit();
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    if (!window) {
+    SDL_Window *window = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    if (!window)
+    {
         fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer) {
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer)
+    {
         SDL_DestroyWindow(window);
         fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
         SDL_Quit();
@@ -440,38 +556,49 @@ int main(int argc, char* argv[]) {
 
     loadPacmanTextures(renderer);
     loadEnemyTexture(renderer);
+    loadNoodleTexture(renderer);
 
     backgroundTexture = loadTexture(renderer, "assets/map_1.png");
     loadMenuTexture(renderer);
     deathTexture = loadTexture(renderer, "assets/mort.png");
 
-    initBarriers(); // Initialisation des barrières
+    initBarriers();
     initEnemies();
+    initNoodles();
 
     bool running = true;
     bool gameOver = false; // Déclaration de la variable pour suivre l'état du jeu
     SDL_Event event;
 
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+    while (running)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT)
+            {
                 running = false;
-            } else if (event.type == SDL_KEYDOWN) {
+            }
+            else if (event.type == SDL_KEYDOWN)
+            {
                 handleInput(event);
-            } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                // Code pour relancer le jeu après la mort
-                if (gameOver) {
-                    // Réinitialisation du jeu
+            }
+            else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+            {
+                if (gameOver)
+                {
                     pacmanSingle.lives = 5;
                     initBarriers();
                     initEnemies();
+                    initNoodles();
                     gameOver = false;
                 }
             }
         }
 
-        if (!gameOver) {
-            if (pacmanSingle.dx == 0 && pacmanSingle.dy == 0) {
+        if (!gameOver)
+        {
+            if (pacmanSingle.dx == 0 && pacmanSingle.dy == 0)
+            {
                 SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
                 SDL_RenderPresent(renderer);
                 continue;
@@ -480,13 +607,15 @@ int main(int argc, char* argv[]) {
             updatePacman();
             updateEnemies();
 
-            for (int i = 0; i < NUM_ENEMIES; i++) {
-                if (checkCollision(&enemies[i], &pacmanSingle)) {
+            for (int i = 0; i < NUM_ENEMIES; i++)
+            {
+                if (checkCollision(&enemies[i], &pacmanSingle))
+                {
                     pacmanSingle.lives--;
-                    printf("Pacman touché ! Vies restantes : %d\n", pacmanSingle.lives);
-                    if (pacmanSingle.lives <= 0) {
-                        printf("Pacman a perdu toutes ses vies ! Fin du jeu.\n");
-                        // Code pour la fin du jeu
+                    printf("Oh non, Totoro à été touché ! Vies restantes : %d\n", pacmanSingle.lives);
+                    if (pacmanSingle.lives <= 0)
+                    {
+                        printf("Totoro a perdu toutes ses vies... Fin du jeu !\n");
                         gameOver = true;
                     }
 
@@ -494,6 +623,9 @@ int main(int argc, char* argv[]) {
                     enemies[i].y = rand() % (WINDOW_HEIGHT - PACMAN_SIZE);
                 }
             }
+
+            checkNoodleCollision();
+            renderNoodles(renderer);
         }
 
         SDL_SetRenderDrawColor(renderer, 125, 175, 66, SDL_ALPHA_OPAQUE);
@@ -504,41 +636,52 @@ int main(int argc, char* argv[]) {
         // Affichage des barrières
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-        for (int i = 0; i < MAX_BARRIERS; i++) {
-            SDL_Rect barrierRect = { barriers[i].x, barriers[i].y, barriers[i].width, barriers[i].height };
+        for (int i = 0; i < MAX_BARRIERS; i++)
+        {
+            SDL_Rect barrierRect = {barriers[i].x, barriers[i].y, barriers[i].width, barriers[i].height};
             SDL_RenderFillRect(renderer, &barrierRect);
         }
 
-        // Affichage des ennemis
-        SDL_Rect enemyRect = { 0, 0, ENEMY_SIZE, ENEMY_SIZE };
+        renderNoodles(renderer);
+
+        SDL_Rect enemyRect = {0, 0, ENEMY_SIZE, ENEMY_SIZE};
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-        
-        for (int i = 0; i < NUM_ENEMIES; i++) {
+
+        for (int i = 0; i < NUM_ENEMIES; i++)
+        {
             enemyRect.x = enemies[i].x;
             enemyRect.y = enemies[i].y;
             SDL_RenderCopy(renderer, enemyTexture, NULL, &enemyRect);
         }
 
-        // Affichage de Pacman
-        SDL_Rect pacmanRect = { pacmanSingle.x, pacmanSingle.y, PACMAN_SIZE, PACMAN_SIZE };
-        SDL_Texture* currentTexture = NULL;
+        // Affichage de totoroo
+        SDL_Rect pacmanRect = {pacmanSingle.x, pacmanSingle.y, PACMAN_SIZE, PACMAN_SIZE};
+        SDL_Texture *currentTexture = NULL;
 
-        if (pacmanSingle.dy == -1) {
+        if (pacmanSingle.dy == -1)
+        {
             currentTexture = pacmanTextureDerriere;
-        } else if (pacmanSingle.dx == 1) {
+        }
+        else if (pacmanSingle.dx == 1)
+        {
             currentTexture = (SDL_GetTicks() / 250) % 2 == 0 ? pacmanTextureDroit1 : pacmanTextureDroit2;
-        } else if (pacmanSingle.dx == -1) {
+        }
+        else if (pacmanSingle.dx == -1)
+        {
             currentTexture = (SDL_GetTicks() / 250) % 2 == 0 ? pacmanTextureGauche1 : pacmanTextureGauche2;
-        } else if (pacmanSingle.dy == 1) {
+        }
+        else if (pacmanSingle.dy == 1)
+        {
             currentTexture = (SDL_GetTicks() / 250) % 2 == 0 ? pacmanTextureDevant1 : pacmanTextureDevant2;
         }
 
-        if (currentTexture != NULL) {
+        if (currentTexture != NULL)
+        {
             SDL_RenderCopy(renderer, currentTexture, NULL, &pacmanRect);
         }
 
-        // Affichage de l'écran de fin si nécessaire
-        if (gameOver) {
+        if (gameOver)
+        {
             SDL_RenderCopy(renderer, deathTexture, NULL, NULL);
         }
 
@@ -558,6 +701,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(enemyTexture);
     SDL_DestroyTexture(menuTexture);
     SDL_DestroyTexture(deathTexture);
+    SDL_DestroyTexture(noodleTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
