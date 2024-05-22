@@ -56,11 +56,7 @@ void loadPacmanTextures(SDL_Renderer* renderer) {
     const char* filePathDroit1 = "assets/totoro_droit_1.png";
     const char* filePathDroit2 = "assets/totoro_droit_2.png";
     const char* filePathDebut = "assets/totoro.png";
-    
-printf("Loading textures from:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
-           filePathGauche1, filePathGauche2, filePathDerriere, filePathDevant1,
-           filePathDevant2, filePathDroit1, filePathDroit2, filePathDebut);
-    
+
     SDL_Surface* tempSurfaceGauche1 = IMG_Load(filePathGauche1);
     SDL_Surface* tempSurfaceGauche2 = IMG_Load(filePathGauche2);
     SDL_Surface* tempSurfaceDerriere = IMG_Load(filePathDerriere);
