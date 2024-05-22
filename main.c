@@ -320,7 +320,7 @@ void initBarriers() {
     barriers[39].width = 55;
     barriers[39].height = 120;
 
-    // Arbres1
+    // Arbres
     barriers[40].x = 540;
     barriers[40].y = 183;
     barriers[40].width = 12;
@@ -330,8 +330,7 @@ void initBarriers() {
     barriers[41].y = 165;
     barriers[41].width = 40;
     barriers[41].height = 50;
-    
-    // Arbres2
+
     barriers[42].x = 195;
     barriers[42].y = 270;
     barriers[42].width = 20;
@@ -340,7 +339,7 @@ void initBarriers() {
     barriers[43].x = 200;
     barriers[43].y = 290;
     barriers[43].width = 10;
-    barriers[43].height = 50;    
+    barriers[43].height = 50;
 }
 
 void handleInput(SDL_Event event) {
@@ -641,9 +640,9 @@ int main(int argc, char* argv[]) {
             for (int i = 0; i < NUM_ENEMIES; i++) {
                 if (checkCollision(&enemies[i], &pacmanSingle)) {
                     pacmanSingle.lives--;
-                    printf("Pacman touché ! Vies restantes : %d\n", pacmanSingle.lives);
+                    printf("Totoro à été touché ! Vies restantes : %d\n", pacmanSingle.lives);
                     if (pacmanSingle.lives <= 0) {
-                        printf("Pacman a perdu toutes ses vies ! Fin du jeu.\n");
+                        printf("Totoro a perdu toutes ses vies... Fin du jeu.\n");
                         // Code pour la fin du jeu
                         gameOver = true;
                     }
