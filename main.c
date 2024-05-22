@@ -327,6 +327,32 @@ void initBarriers()
     barriers[38].y = 350;
     barriers[38].width = 200;
     barriers[38].height = 155;
+
+    // Arbres
+    barriers[39].x = 540;
+    barriers[39].y = 183;
+    barriers[39].width = 12;
+    barriers[39].height = 50;
+
+    barriers[40].x = 525;
+    barriers[40].y = 165;
+    barriers[40].width = 40;
+    barriers[40].height = 50;
+
+    barriers[41].x = 200;
+    barriers[41].y = 290;
+    barriers[41].width = 10;
+    barriers[41].height = 50;
+
+    barriers[42].x = 195;
+    barriers[42].y = 270;
+    barriers[42].width = 20;
+    barriers[42].height = 50;
+
+    barriers[41].x = 200;
+    barriers[41].y = 290;
+    barriers[41].width = 10;
+    barriers[41].height = 50;
 }
 
 void handleInput(SDL_Event event)
