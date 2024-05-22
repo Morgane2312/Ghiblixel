@@ -16,7 +16,7 @@
 #define MAX_BARRIERS 50
 #define MAX_BAR_WIDTH 20
 #define MAX_BAR_HEIGHT 50
-#define NUM_NOODLES 5
+#define NUM_NOODLES 4
 
 typedef struct
 {
@@ -534,15 +534,18 @@ bool checkCollision(Enemy *enemy, Pacman *pacman)
 void checkNoodleCollision()
 {
     SDL_Rect pacmanRect = {pacmanSingle.x, pacmanSingle.y, PACMAN_SIZE, PACMAN_SIZE};
-    for (int i = 0; i < NUM_NOODLES; i++)
+    static int score = 0; // initialisation du score a 0 pour apres l'incrémenter
+    for (int i = 0; i < NUM_NOODLES; i++) // on parcours toutes les nouilles
     {
-        if (noodles[i].isVisible)
+        if (noodles[i].isVisible) // et si la nouille est visible et que y'a collision on ajoute 1
         {
             SDL_Rect noodleRect = {noodles[i].x, noodles[i].y, PACMAN_SIZE, PACMAN_SIZE};
             if (SDL_HasIntersection(&pacmanRect, &noodleRect))
             {
                 noodles[i].isVisible = false;
-                // Ajoutez tout code supplémentaire ici si nécessaire (comme augmenter le score)
+                score++; // On incrémente quand on touche une nouille
+                // on affiche le score au fur et a mesure dans la console
+                printf("Nouilles recuperees : %d/%d\n", score, NUM_NOODLES);
             }
         }
     }
