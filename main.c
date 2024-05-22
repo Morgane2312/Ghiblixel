@@ -51,6 +51,7 @@ void initNoodles();
 void loadNoodleTexture(SDL_Renderer* renderer);
 void renderNoodles(SDL_Renderer* renderer);
 void checkNoodleCollision();
+bool allNoodlesCollected();
 
 // Variables globales
 Pacman pacmanSingle = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 0, 0, 5};
@@ -70,6 +71,7 @@ SDL_Texture* pacmanTextureDebut = NULL;
 SDL_Texture* backgroundTexture = NULL;
 SDL_Texture* menuTexture = NULL;
 SDL_Texture* deathTexture = NULL;
+SDL_Texture* winTexture = NULL;
 Barrier barriers[MAX_BARRIERS];
 
 // Fonction pour charger les textures de Pacman
@@ -320,7 +322,7 @@ void initBarriers() {
     barriers[39].width = 55;
     barriers[39].height = 120;
 
-    // Arbres
+    // Arbres1
     barriers[40].x = 540;
     barriers[40].y = 183;
     barriers[40].width = 12;
@@ -330,7 +332,8 @@ void initBarriers() {
     barriers[41].y = 165;
     barriers[41].width = 40;
     barriers[41].height = 50;
-
+    
+    // Arbres2
     barriers[42].x = 195;
     barriers[42].y = 270;
     barriers[42].width = 20;
@@ -339,7 +342,7 @@ void initBarriers() {
     barriers[43].x = 200;
     barriers[43].y = 290;
     barriers[43].width = 10;
-    barriers[43].height = 50;
+    barriers[43].height = 50;    
 }
 
 void handleInput(SDL_Event event) {
@@ -492,6 +495,7 @@ void updateEnemies() {
                 enemies[i].x += enemies[i].dx * ENEMY_SPEED;
                 enemies[i].y += enemies[i].dy * ENEMY_SPEED;
             } else {
+                // If no valid direction found, reverse direction
                 enemies[i].dx *= -1;
                 enemies[i].dy *= -1;
             }
@@ -564,6 +568,15 @@ void checkNoodleCollision() {
     }
 }
 
+bool allNoodlesCollected() {
+    for (int i = 0; i < NUM_NOODLES; i++) {
+        if (noodles[i].isVisible) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
@@ -598,9 +611,11 @@ int main(int argc, char* argv[]) {
     backgroundTexture = loadTexture(renderer, "assets/map_1.png");
     loadMenuTexture(renderer);
     deathTexture = loadTexture(renderer, "assets/mort.png");
+    winTexture = loadTexture(renderer, "assets/victoire.png");
 
     initBarriers(); // Initialisation des barrières
     bool gameOver = false;
+    bool gameWon = false;
     initEnemies(&gameOver);
     initNoodles();
 
@@ -615,18 +630,19 @@ int main(int argc, char* argv[]) {
                 handleInput(event);
             } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 // Code pour relancer le jeu après la mort
-                if (gameOver) {
+                if (gameOver || gameWon) {
                     // Réinitialisation du jeu
                     pacmanSingle.lives = 5;
                     initBarriers();
                     initEnemies(&gameOver);
                     initNoodles();
                     gameOver = false;
+                    gameWon = false;
                 }
             }
         }
 
-        if (!gameOver) {
+        if (!gameOver && !gameWon) {
             if (pacmanSingle.dx == 0 && pacmanSingle.dy == 0) {
                 SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
                 SDL_RenderPresent(renderer);
@@ -637,12 +653,17 @@ int main(int argc, char* argv[]) {
             updateEnemies();
             checkNoodleCollision();
 
+            if (allNoodlesCollected()) {
+                gameWon = true;
+                printf("Félicitations ! Vous avez récupéré toutes les nouilles !\n");
+            }
+
             for (int i = 0; i < NUM_ENEMIES; i++) {
                 if (checkCollision(&enemies[i], &pacmanSingle)) {
                     pacmanSingle.lives--;
-                    printf("Totoro à été touché ! Vies restantes : %d\n", pacmanSingle.lives);
+                    printf("Pacman touché ! Vies restantes : %d\n", pacmanSingle.lives);
                     if (pacmanSingle.lives <= 0) {
-                        printf("Totoro a perdu toutes ses vies... Fin du jeu.\n");
+                        printf("Pacman a perdu toutes ses vies ! Fin du jeu.\n");
                         // Code pour la fin du jeu
                         gameOver = true;
                     }
@@ -701,6 +722,8 @@ int main(int argc, char* argv[]) {
         // Affichage de l'écran de fin si nécessaire
         if (gameOver) {
             SDL_RenderCopy(renderer, deathTexture, NULL, NULL);
+        } else if (gameWon) {
+            SDL_RenderCopy(renderer, winTexture, NULL, NULL);
         }
 
         SDL_RenderPresent(renderer);
@@ -720,6 +743,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(menuTexture);
     SDL_DestroyTexture(deathTexture);
     SDL_DestroyTexture(noodleTexture);
+    SDL_DestroyTexture(winTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
